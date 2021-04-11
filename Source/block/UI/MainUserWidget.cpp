@@ -7,6 +7,8 @@
 #include "Components/WidgetSwitcher.h"
 #include "Components/UniformGridPanel.h"	
 #include "Components/EditableTextBox.h"
+#include "Json.h"
+
 bool UMainUserWidget::Initialize() {
 	if (!Super::Initialize()) {
 		return false;
@@ -77,5 +79,5 @@ void UMainUserWidget::SetAllUGPState(ESlateVisibility v) {
 }
 
 void UMainUserWidget::SubmitEvent() {
-
+	TSharedPtr<FJsonObject> j = MakeShared<FJsonObject>();
 }
