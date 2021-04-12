@@ -8,6 +8,8 @@
 #include "Components/UniformGridPanel.h"	
 #include "Components/EditableTextBox.h"
 #include "Json.h"
+#include "../Config/StrConst.h"
+#include "Components/ComboBoxString.h"
 
 bool UMainUserWidget::Initialize() {
 	if (!Super::Initialize()) {
@@ -80,4 +82,39 @@ void UMainUserWidget::SetAllUGPState(ESlateVisibility v) {
 
 void UMainUserWidget::SubmitEvent() {
 	TSharedPtr<FJsonObject> j = MakeShared<FJsonObject>();
+	
+	j->SetStringField(StrConst::Get().UUID, ET_uuid->GetText().ToString()); 
+	j->SetStringField(StrConst::Get().RECORD_TIME, ET_recordtime->GetText().ToString());
+	j->SetStringField(StrConst::Get().EVENT_TIME, ET_eventtime->GetText().ToString());
+	j->SetStringField(StrConst::Get().EVENT_TIME_ZONE_OFFSET, ET_timezoneoff->GetText().ToString());
+
+	if (ET_bizstep->GetText().ToString() != "") j->SetStringField(StrConst::Get().BIZ_STEP, ET_bizstep->GetText().ToString());
+	if (ET_disposition->GetText().ToString() != "") j->SetStringField(StrConst::Get().DISPOSITION, ET_disposition->GetText().ToString());
+	if (ET_readpoint->GetText().ToString() != "") j->SetStringField(StrConst::Get().READ_POINT, ET_readpoint->GetText().ToString());
+	if (ET_bizloc->GetText().ToString() != "") j->SetStringField(StrConst::Get().BIZ_LOCATION, ET_bizloc->GetText().ToString());
+ 
+
+	auto etype = CB_etype->GetSelectedOption(), action = CB_action->GetSelectedOption();
+	j->SetNumberField(StrConst::Get().EVENT_TYPE, (double)((uint8)now_et));
+	switch (now_et) {
+	case EEventType::Object: 
+		j->SetStringField(StrConst::Get().ACTION, action);
+		break;
+	case EEventType::Aggregation:
+		j->SetStringField(StrConst::Get().ACTION, action);
+		break;
+	case EEventType::Transformation: 
+		break;
+	case EEventType::Transaction:
+		j->SetStringField(StrConst::Get().ACTION, action);
+		break;
+	}
+
+
+	FString OutputString;
+	TSharedRef<TJsonWriter<TCHAR>> JsonWriter = TJsonWriterFactory<>::Create(&OutputString);
+	FJsonSerializer::Serialize(j.ToSharedRef(), JsonWriter);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *OutputString);
+
+
 }

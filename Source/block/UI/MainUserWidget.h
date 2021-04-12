@@ -9,10 +9,12 @@
 
 UENUM(BlueprintType)
 enum class EEventType : uint8 {
-	Object,
-	Aggregation,
-	Transformation,
-	Transaction
+	// must same as IntConst
+	ShouldNotExist=0,
+	Object=1,
+	Aggregation=2,
+	Transformation=3,
+	Transaction=4
 };
 /**
  * 
@@ -60,6 +62,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UUniformGridPanel* UGP_OutputQuantityList = nullptr; 
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+	class UComboBoxString* CB_etype; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+	class UComboBoxString* CB_action;
 
 	// common must
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))

@@ -10,3 +10,8 @@ StrConst::StrConst()
 StrConst::~StrConst()
 {
 }
+
+StrConst& StrConst::Get() {
+	static StrConst sc;
+	return sc;
+}
