@@ -9,13 +9,11 @@
 #include "ApiReturn.generated.h"
 /**
  * 
- */
+ */ 
 UCLASS()
 class BLOCK_API UApiReturn : public UObject
-{
-
+{  
 	GENERATED_BODY()
-
 private:
 	void SetCompleted(bool x);
 	void SetSuccess(bool x);
@@ -28,5 +26,9 @@ public:
 
 	//UApiReturn(); 
 	void ProcessRequestCompleted(FHttpRequestPtr request, FHttpResponsePtr response, bool bWasSuccessful);
-	void SetStartOk(bool x); 
+	void SetStartOk(bool x);
+
+	bool IsStartOk();
+	bool IsCompleted();
+	bool IsSuccess();
 };

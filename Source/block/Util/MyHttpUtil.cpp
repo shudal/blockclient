@@ -10,14 +10,14 @@ MyHttpUtil::MyHttpUtil()
 MyHttpUtil::~MyHttpUtil()
 {
 } 
-TSharedPtr<UApiReturn> MyHttpUtil::PostParameter(FString url, TMap<FString, FString> Parameters) {
-	//TSharedPtr<UApiReturn> ret = MakeShared<UApiReturn>();
-
-	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
-	TSharedPtr<UApiReturn> ret = MakeShareable(NewObject<UApiReturn>());
-	HttpRequest->OnProcessRequestComplete().BindUObject(ret.Get(), &UApiReturn::ProcessRequestCompleted);
-	HttpRequest->SetVerb("POST");
-	HttpRequest->SetHeader("Content-Type", "application/x-www-form-urlencoded");   
+UApiReturn* MyHttpUtil::PostParameter(FString url, TMap<FString, FString> Parameters) { 
+	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest(); 
+	UApiReturn* ret = NewObject<UApiReturn>();
+	HttpRequest->OnProcessRequestComplete().BindUObject(ret, &UApiReturn::ProcessRequestCompleted);
+	
+	FString Boundary = "---------------------------" + FString::FromInt(FDateTime::Now().GetTicks());
+	HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("multipart/form-data;boundary =" + Boundary));
+	HttpRequest->SetVerb("POST");  
 	HttpRequest->SetURL(url); 
 
 	FString ContentString;
@@ -29,18 +29,17 @@ TSharedPtr<UApiReturn> MyHttpUtil::PostParameter(FString url, TMap<FString, FStr
 
 	for (size_t i = 0; i < Keys.Num(); i++)
 	{
-		if (i == 0)
-		{
-			ContentString += Keys[i] + "=" + *Parameters.Find(Keys[i]);
-		}
-		else
-		{
-			ContentString += "&" + Keys[i] + "=" + *Parameters.Find(Keys[i]);
-		}
+
+		ContentString.Append("\r\n--" + Boundary + "\r\n");
+		ContentString.Append("Content-Disposition: form-data; name=\"" + Keys[i] + "\"\r\n\r\n");
+		ContentString.Append(*Parameters.Find(Keys[i]) + "\r\n");
 
 
 	}
 
+
+	FString EndBoundary = "\r\n--" + Boundary + "--\r\n";
+	ContentString.Append(EndBoundary);
 
 	HttpRequest->SetContentAsString(ContentString);
 

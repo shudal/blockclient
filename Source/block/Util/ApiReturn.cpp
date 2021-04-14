@@ -50,3 +50,7 @@ void UApiReturn::ProcessRequestCompleted(FHttpRequestPtr request, FHttpResponseP
  
 	SetCompleted(true);
 }
+
+bool UApiReturn::IsStartOk() { return bStartOk; }
+bool UApiReturn::IsCompleted() { return bCompleted; }
+bool UApiReturn::IsSuccess() { return bSuccess; }

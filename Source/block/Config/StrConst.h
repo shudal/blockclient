@@ -50,4 +50,7 @@ public:
 	FString CONTRACT_METHOD_GET = "getEvent";
 	FString CONTRACT_RES = "contract_res";
 	FString CONTRACT_RES_BAD = "contract_res_bad";
+
+	FString uri_host = "http://95.179.176.135:8023/";
+	FString uri_add_event = uri_host + "event/add";
 };

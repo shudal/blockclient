@@ -10,6 +10,7 @@
 #include "Json.h"
 #include "../Config/StrConst.h"
 #include "Components/ComboBoxString.h"
+#include "../Util/MyHttpUtil.h"
 
 bool UMainUserWidget::Initialize() {
 	if (!Super::Initialize()) {
@@ -111,10 +112,28 @@ void UMainUserWidget::SubmitEvent() {
 	}
 
 
+	TSharedPtr<FJsonObject> inputJS = MakeShared<FJsonObject>();
+	TArray<TSharedPtr<FJsonValue>> events;
+	auto e1 = MakeShareable(new FJsonValueObject(j));
+	events.Add(e1);
+	inputJS->SetArrayField("data", events);
+
 	FString OutputString;
 	TSharedRef<TJsonWriter<TCHAR>> JsonWriter = TJsonWriterFactory<>::Create(&OutputString);
-	FJsonSerializer::Serialize(j.ToSharedRef(), JsonWriter);
+	FJsonSerializer::Serialize(inputJS.ToSharedRef(), JsonWriter);
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *OutputString);
 
+	TMap<FString, FString> params;
+	params.Emplace("input", OutputString);
+	UApiReturn* apiret = MyHttpUtil::PostParameter(StrConst::Get().uri_add_event, params);
+	if (apiret->IsStartOk()) {
 
+		UE_LOG(LogTemp, Warning, TEXT("request ok"));
+		//while (!apiret->IsCompleted());
+		UE_LOG(LogTemp, Warning, TEXT("request completed"));
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("request faield"));
+	}
+	
 }

@@ -14,7 +14,7 @@ public:
 	~MyHttpUtil(); 
 	
 	UFUNCTION(BlueprintCallable)
-		static TSharedPtr<UApiReturn> PostParameter(FString url, TMap<FString, FString> Parameters);
+		static UApiReturn* PostParameter(FString url, TMap<FString, FString> Parameters);
 
 };
  
