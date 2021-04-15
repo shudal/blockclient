@@ -125,7 +125,7 @@ void UMainUserWidget::SubmitEvent() {
 
 	TMap<FString, FString> params;
 	params.Emplace("input", OutputString);
-	UApiReturn* apiret = MyHttpUtil::PostParameter(StrConst::Get().uri_add_event, params);
+	UApiReturn* apiret = MyHttpUtil::PostFormData(StrConst::Get().uri_add_event, params);
 	if (apiret->IsStartOk()) {
 
 		UE_LOG(LogTemp, Warning, TEXT("request ok"));
@@ -134,6 +134,5 @@ void UMainUserWidget::SubmitEvent() {
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("request faield"));
-	}
-	
+	} 
 }

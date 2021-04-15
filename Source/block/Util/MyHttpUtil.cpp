@@ -10,7 +10,7 @@ MyHttpUtil::MyHttpUtil()
 MyHttpUtil::~MyHttpUtil()
 {
 } 
-UApiReturn* MyHttpUtil::PostParameter(FString url, TMap<FString, FString> Parameters) { 
+UApiReturn* MyHttpUtil::PostFormData(FString url, TMap<FString, FString> Parameters) { 
 	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest(); 
 	UApiReturn* ret = NewObject<UApiReturn>();
 	HttpRequest->OnProcessRequestComplete().BindUObject(ret, &UApiReturn::ProcessRequestCompleted);
