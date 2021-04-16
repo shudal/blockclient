@@ -6,11 +6,15 @@
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/UniformGridPanel.h"	
-#include "Components/EditableTextBox.h"
+#include "Components/EditableTextBox.h" 
+#include "Components/Overlay.h"
+#include "Components/TextBlock.h"
 #include "Json.h"
 #include "../Config/StrConst.h"
 #include "Components/ComboBoxString.h"
 #include "../Util/MyHttpUtil.h"
+
+
 
 bool UMainUserWidget::Initialize() {
 	if (!Super::Initialize()) {
@@ -18,6 +22,7 @@ bool UMainUserWidget::Initialize() {
 	}  
 
 	this->SetFormLayoutFromEventType(FString("Object"));
+	this->OL_Typevalue->SetVisibility(ESlateVisibility::Collapsed);
 	return true;
 }
 
@@ -103,13 +108,20 @@ void UMainUserWidget::SubmitEvent() {
 		break;
 	case EEventType::Aggregation:
 		j->SetStringField(StrConst::Get().ACTION, action);
+		if (ET_parentid->GetText().ToString() != "") j->SetStringField(StrConst::Get().PARENT_ID, ET_parentid->GetText().ToString());
 		break;
 	case EEventType::Transformation: 
+		if (ET_transid->GetText().ToString() != "") j->SetStringField(StrConst::Get().TRANSFORMATION_ID, ET_transid->GetText().ToString());
 		break;
 	case EEventType::Transaction:
-		j->SetStringField(StrConst::Get().ACTION, action);
+		j->SetStringField(StrConst::Get().ACTION, action); 
+		if (ET_parentid->GetText().ToString() != "") j->SetStringField(StrConst::Get().PARENT_ID, ET_parentid->GetText().ToString());
 		break;
 	}
+
+	if (biztrans.Num() > 0) j->SetArrayField(StrConst::Get().BIZ_TRANSACTION_LIST, biztrans);
+	if (sourlist.Num() > 0) j->SetArrayField(StrConst::Get().SOURCE_LIST, sourlist);
+	if (destlist.Num() > 0) j->SetArrayField(StrConst::Get().DESTINATION_LIST, destlist);
 
 
 	TSharedPtr<FJsonObject> inputJS = MakeShared<FJsonObject>();
@@ -135,4 +147,74 @@ void UMainUserWidget::SubmitEvent() {
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("request faield"));
 	} 
+}
+
+void UMainUserWidget::InputTypeValue(ETypeValueType tvt) { 
+	this->OL_Typevalue->SetVisibility(ESlateVisibility::Visible);
+	FString t1 = "";
+	switch (tvt) {
+	case ETypeValueType::BizTransaction: 
+		t1 = "BizTransaction";
+		now_add_typevalue = &biztrans;
+		break;
+	case ETypeValueType::SourceList: 
+		t1 = "SourceList";
+		now_add_typevalue = &sourlist;
+		break;
+	case ETypeValueType::DestList: 
+		t1 = "DestList";
+		now_add_typevalue = &destlist;
+		break;
+	}
+	FString tip = FString::Printf(TEXT("ÇëÊäÈë%s(ÒÑÓÐ%d)"), *t1,now_add_typevalue->Num());
+	this->TB_typevaluetip->SetText(FText::FromString(tip));
+}
+
+void UMainUserWidget::InputEpc(EEpcType et) { 
+	this->OL_EpcList->SetVisibility(ESlateVisibility::Visible);
+
+	FString t1 = "";
+	switch (et) { 
+	case EEpcType::Epclist:
+		now_add_epc = &epclist;
+		t1 = "Epclist";
+		break;
+	case EEpcType::InEpclist:
+		now_add_epc = &inepclist;
+		t1 = "InEpclist";
+		break;
+	case EEpcType::OutEpclist:
+		now_add_epc = &outepclist;
+		t1 = "OutEpclist";
+		break;
+	}
+
+	FString tip = FString::Printf(TEXT("%s(already count %d)"), *t1, now_add_epc->Num());
+	this->TB_epctip->SetText(FText::FromString(tip));
+}
+void UMainUserWidget::SubmitTypeValue() { 
+	this->CollapseTypeValueInput();
+	auto type = this->ET_typevalue_type->GetText().ToString();
+	auto value = this->ET_typevlaue_value->GetText().ToString();
+
+
+	TSharedPtr<FJsonObject> j = MakeShared<FJsonObject>(); 
+	j->SetStringField(StrConst::Get().TYPEVALUE_TYPE, type);
+	j->SetStringField(StrConst::Get().TYPEVALUE_VALUE, value); 
+	auto j1 = MakeShareable(new FJsonValueObject(j));
+	now_add_typevalue->Add(j1);
+}
+
+void UMainUserWidget::SubmitEpc() {
+	this->CollapseEpcInput();
+
+	auto epcclass = this->ET_epc->GetText().ToString();
+	auto j1 = MakeShareable(new FJsonValueString(epcclass));
+	now_add_epc->Add(j1);
+}
+void UMainUserWidget::CollapseTypeValueInput() { 
+	this->OL_Typevalue->SetVisibility(ESlateVisibility::Collapsed);
+} 
+void UMainUserWidget::CollapseEpcInput() {
+	this->OL_EpcList->SetVisibility(ESlateVisibility::Collapsed);
 }

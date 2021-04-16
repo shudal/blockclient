@@ -16,6 +16,31 @@ enum class EEventType : uint8 {
 	Transformation=3,
 	Transaction=4
 };
+UENUM(BlueprintType)
+enum class ETypeValueType : uint8 {
+	// must same as IntConst
+	ShouldNotExist = 0,
+	BizTransaction = 1,
+	SourceList = 2,
+	DestList = 3
+};
+UENUM(BlueprintType)
+enum class EEpcType : uint8 {
+	// must same as IntConst
+	ShouldNotExist = 0,
+	Epclist = 1,  
+	InEpclist = 2, 
+	OutEpclist = 3, 
+};
+UENUM(BlueprintType)
+enum class EQuantityType : uint8 {
+	// must same as IntConst
+	ShouldNotExist = 0, 
+	Quantitylist = 1, 
+	InQuantitylist = 2, 
+	OutQuantitylist = 3,
+};
+
 /**
  * 
  */
@@ -26,6 +51,21 @@ class BLOCK_API UMainUserWidget : public UUserWidget
 	
 private:
 	EEventType now_et = EEventType::Object;
+	TArray<TSharedPtr<FJsonValue>> biztrans;
+	TArray<TSharedPtr<FJsonValue>> sourlist;
+	TArray<TSharedPtr<FJsonValue>> destlist;
+	TArray<TSharedPtr<FJsonValue>>* now_add_typevalue = nullptr;
+
+
+	TArray<TSharedPtr<FJsonValue>> epclist;
+	TArray<TSharedPtr<FJsonValue>> quantitylist;
+
+	TArray<TSharedPtr<FJsonValue>> inepclist;
+	TArray<TSharedPtr<FJsonValue>> inquantitylist;
+	TArray<TSharedPtr<FJsonValue>> outepclist;
+	TArray<TSharedPtr<FJsonValue>> outquantitylist;
+	TArray<TSharedPtr<FJsonValue>>* now_add_epc = nullptr;
+	TArray<TSharedPtr<FJsonValue>>* now_add_quantity = nullptr;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UWidgetSwitcher* MyWS = nullptr;
@@ -91,6 +131,27 @@ protected:
 		class UEditableTextBox* ET_parentid = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UEditableTextBox* ET_transid = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UOverlay* OL_Typevalue = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UTextBlock* TB_typevaluetip = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_typevalue_type = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_typevlaue_value = nullptr;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UOverlay* OL_EpcList = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UTextBlock* TB_epctip = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_epc = nullptr;
+	 
+		
 private:
 	void SetAllUGPState(ESlateVisibility v);
 protected:
@@ -104,6 +165,24 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 		void SubmitEvent();
+
+
+	UFUNCTION(BlueprintCallable)
+		void InputTypeValue(ETypeValueType tvt);
+
+	UFUNCTION(BlueprintCallable)
+		void InputEpc(EEpcType et);
+
+	UFUNCTION(BlueprintCallable)
+		void SubmitTypeValue();
+	UFUNCTION(BlueprintCallable)
+		void SubmitEpc();
+
+	UFUNCTION(BlueprintCallable)
+		void CollapseTypeValueInput();
+	UFUNCTION(BlueprintCallable)
+		void CollapseEpcInput();
+
 public:
 
 	virtual bool Initialize() override;

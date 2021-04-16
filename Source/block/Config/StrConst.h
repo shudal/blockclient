@@ -15,6 +15,7 @@ public:
 
 	static StrConst& Get();
 
+	// must same as conserver
 	FString RECORD_TIME = "recordTime";
 	FString EVENT_TIME = "eventTime";
 	FString EVENT_TIME_ZONE_OFFSET = "eventTimeZoneOffset";
@@ -50,6 +51,10 @@ public:
 	FString CONTRACT_METHOD_GET = "getEvent";
 	FString CONTRACT_RES = "contract_res";
 	FString CONTRACT_RES_BAD = "contract_res_bad";
+	
+	// typevalue, same as conserver
+	FString TYPEVALUE_TYPE = "type";
+	FString TYPEVALUE_VALUE = "value";
 
 	FString uri_host = "http://95.179.176.135:8023/";
 	FString uri_add_event = uri_host + "event/add";
