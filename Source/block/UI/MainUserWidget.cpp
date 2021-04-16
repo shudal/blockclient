@@ -23,6 +23,8 @@ bool UMainUserWidget::Initialize() {
 
 	this->SetFormLayoutFromEventType(FString("Object"));
 	this->OL_Typevalue->SetVisibility(ESlateVisibility::Collapsed);
+	this->OL_EpcList->SetVisibility(ESlateVisibility::Collapsed);
+	this->OL_QuantityList->SetVisibility(ESlateVisibility::Collapsed);
 	return true;
 }
 
@@ -104,18 +106,29 @@ void UMainUserWidget::SubmitEvent() {
 	j->SetNumberField(StrConst::Get().EVENT_TYPE, (double)((uint8)now_et));
 	switch (now_et) {
 	case EEventType::Object: 
-		j->SetStringField(StrConst::Get().ACTION, action);
+		j->SetStringField(StrConst::Get().ACTION, action); 
+		if (epclist.Num() > 0) j->SetArrayField(StrConst::Get().EPC_LIST, epclist); 
+		if (quantitylist.Num() > 0) j->SetArrayField(StrConst::Get().QUANTITY_LIST, quantitylist);
 		break;
 	case EEventType::Aggregation:
 		j->SetStringField(StrConst::Get().ACTION, action);
 		if (ET_parentid->GetText().ToString() != "") j->SetStringField(StrConst::Get().PARENT_ID, ET_parentid->GetText().ToString());
+		if (epclist.Num() > 0) j->SetArrayField(StrConst::Get().CHILD_EPCS, epclist);
+		if (quantitylist.Num() > 0) j->SetArrayField(StrConst::Get().CHILD_QUANTITY_LIST, quantitylist);
 		break;
 	case EEventType::Transformation: 
 		if (ET_transid->GetText().ToString() != "") j->SetStringField(StrConst::Get().TRANSFORMATION_ID, ET_transid->GetText().ToString());
+
+		if (inepclist.Num() > 0) j->SetArrayField(StrConst::Get().INPUT_LIST, inepclist);
+		if (outepclist.Num() > 0) j->SetArrayField(StrConst::Get().OUTPUT_LIST, outepclist);
+		if (inquantitylist.Num() > 0) j->SetArrayField(StrConst::Get().INPUT_QUANTITY_LIST, inquantitylist);
+		if (outquantitylist.Num() > 0) j->SetArrayField(StrConst::Get().OUTPUT_QUANTITY_LIST, outquantitylist);
 		break;
 	case EEventType::Transaction:
 		j->SetStringField(StrConst::Get().ACTION, action); 
 		if (ET_parentid->GetText().ToString() != "") j->SetStringField(StrConst::Get().PARENT_ID, ET_parentid->GetText().ToString());
+		if (epclist.Num() > 0) j->SetArrayField(StrConst::Get().EPC_LIST, epclist);
+		if (quantitylist.Num() > 0) j->SetArrayField(StrConst::Get().QUANTITY_LIST, quantitylist);
 		break;
 	}
 
@@ -166,7 +179,7 @@ void UMainUserWidget::InputTypeValue(ETypeValueType tvt) {
 		now_add_typevalue = &destlist;
 		break;
 	}
-	FString tip = FString::Printf(TEXT("ÇëÊäÈë%s(ÒÑÓÐ%d)"), *t1,now_add_typevalue->Num());
+	FString tip = FString::Printf(TEXT("%s(already count %d)"), *t1,now_add_typevalue->Num());
 	this->TB_typevaluetip->SetText(FText::FromString(tip));
 }
 
@@ -192,6 +205,29 @@ void UMainUserWidget::InputEpc(EEpcType et) {
 	FString tip = FString::Printf(TEXT("%s(already count %d)"), *t1, now_add_epc->Num());
 	this->TB_epctip->SetText(FText::FromString(tip));
 }
+
+void UMainUserWidget::InputQuantity(EQuantityType  qt) {
+	this->OL_QuantityList->SetVisibility(ESlateVisibility::Visible);
+
+	FString t1 = "";
+	switch (qt) { 
+	case EQuantityType::Quantitylist:
+		now_add_quantity = &quantitylist;
+		t1 = "QuantityList";
+		break;
+	case EQuantityType::InQuantitylist:
+		now_add_quantity = &inquantitylist;
+		t1 = "InQuantityList";
+		break;
+	case EQuantityType::OutQuantitylist:
+		now_add_quantity = &outquantitylist;
+		t1 = "OutQuantityList";
+		break;
+	}
+
+	FString tip = FString::Printf(TEXT("%s(already count %d)"), *t1, now_add_quantity->Num());
+	this->TB_quantip->SetText(FText::FromString(tip));
+}
 void UMainUserWidget::SubmitTypeValue() { 
 	this->CollapseTypeValueInput();
 	auto type = this->ET_typevalue_type->GetText().ToString();
@@ -212,9 +248,24 @@ void UMainUserWidget::SubmitEpc() {
 	auto j1 = MakeShareable(new FJsonValueString(epcclass));
 	now_add_epc->Add(j1);
 }
+void UMainUserWidget::SubmitQuantity() {
+	this->CollapseQuantityInput();
+
+
+	TSharedPtr<FJsonObject> j = MakeShared<FJsonObject>();
+	j->SetStringField(StrConst::Get().EPC_CLASS, this->ET_quanuuid->GetText().ToString());
+	if (this->ET_quantity->GetText().ToString() != "") j->SetStringField(StrConst::Get().QUANTITY, this->ET_quantity->GetText().ToString());
+	if (this->ET_uom->GetText().ToString() != "") j->SetStringField(StrConst::Get().UOM, this->ET_uom->GetText().ToString());
+
+	auto j1 = MakeShareable(new FJsonValueObject(j));
+	now_add_quantity->Add(j1);
+}
 void UMainUserWidget::CollapseTypeValueInput() { 
 	this->OL_Typevalue->SetVisibility(ESlateVisibility::Collapsed);
 } 
 void UMainUserWidget::CollapseEpcInput() {
 	this->OL_EpcList->SetVisibility(ESlateVisibility::Collapsed);
 }
+void UMainUserWidget::CollapseQuantityInput() {
+	this->OL_QuantityList->SetVisibility(ESlateVisibility::Collapsed);
+} 

@@ -144,12 +144,26 @@ protected:
 		class UEditableTextBox* ET_typevlaue_value = nullptr;
 
 
+	// epc list
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UOverlay* OL_EpcList = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UTextBlock* TB_epctip = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UEditableTextBox* ET_epc = nullptr;
+
+	// epc quantity list
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UOverlay* OL_QuantityList = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UTextBlock* TB_quantip = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_quanuuid = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_quantity = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_uom = nullptr;
 	 
 		
 private:
@@ -172,16 +186,22 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 		void InputEpc(EEpcType et);
+	UFUNCTION(BlueprintCallable)
+		void InputQuantity(EQuantityType qt);
 
 	UFUNCTION(BlueprintCallable)
 		void SubmitTypeValue();
 	UFUNCTION(BlueprintCallable)
 		void SubmitEpc();
+	UFUNCTION(BlueprintCallable)
+		void SubmitQuantity();
 
 	UFUNCTION(BlueprintCallable)
 		void CollapseTypeValueInput();
 	UFUNCTION(BlueprintCallable)
 		void CollapseEpcInput();
+	UFUNCTION(BlueprintCallable)
+		void CollapseQuantityInput();
 
 public:
 
