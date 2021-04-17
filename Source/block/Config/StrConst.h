@@ -58,4 +58,5 @@ public:
 
 	FString uri_host = "http://95.179.176.135:8023/";
 	FString uri_add_event = uri_host + "event/add";
+	FString uri_add_voc = uri_host + "voc/add/voc";
 };

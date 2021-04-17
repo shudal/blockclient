@@ -66,6 +66,10 @@ private:
 	TArray<TSharedPtr<FJsonValue>> outquantitylist;
 	TArray<TSharedPtr<FJsonValue>>* now_add_epc = nullptr;
 	TArray<TSharedPtr<FJsonValue>>* now_add_quantity = nullptr;
+
+	TArray<TSharedPtr<FJsonValue>> vocattrs;
+	TArray<TSharedPtr<FJsonValue>> vocchilds;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UWidgetSwitcher* MyWS = nullptr;
@@ -164,7 +168,30 @@ protected:
 		class UEditableTextBox* ET_quantity = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UEditableTextBox* ET_uom = nullptr;
-	 
+
+	// voc
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_vocuuid = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_voctype = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_vocuri = nullptr; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UOverlay* OL_vocattr = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_vocattrname = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_vocattrvalue = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+	class UTextBlock* TB_inputvocattrtip = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_childvocuuid = nullptr;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UOverlay* OL_vocchild = nullptr; 
 		
 private:
 	void SetAllUGPState(ESlateVisibility v);
@@ -188,6 +215,8 @@ protected:
 		void InputEpc(EEpcType et);
 	UFUNCTION(BlueprintCallable)
 		void InputQuantity(EQuantityType qt);
+	UFUNCTION(BlueprintCallable)
+		void InputVocattr();
 
 	UFUNCTION(BlueprintCallable)
 		void SubmitTypeValue();
@@ -195,6 +224,12 @@ protected:
 		void SubmitEpc();
 	UFUNCTION(BlueprintCallable)
 		void SubmitQuantity();
+	UFUNCTION(BlueprintCallable)
+		void SubmitVoc();
+	UFUNCTION(BlueprintCallable)
+		void SubmitVocAttr();
+	UFUNCTION(BlueprintCallable)
+		void SubmitVocchild();
 
 	UFUNCTION(BlueprintCallable)
 		void CollapseTypeValueInput();
@@ -202,6 +237,10 @@ protected:
 		void CollapseEpcInput();
 	UFUNCTION(BlueprintCallable)
 		void CollapseQuantityInput();
+	UFUNCTION(BlueprintCallable)
+		void CollapseVocattr();
+	UFUNCTION(BlueprintCallable)
+		void CollapseVocchild();
 
 public:
 

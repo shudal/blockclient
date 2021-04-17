@@ -25,6 +25,8 @@ bool UMainUserWidget::Initialize() {
 	this->OL_Typevalue->SetVisibility(ESlateVisibility::Collapsed);
 	this->OL_EpcList->SetVisibility(ESlateVisibility::Collapsed);
 	this->OL_QuantityList->SetVisibility(ESlateVisibility::Collapsed);
+	this->CollapseVocattr();
+	CollapseVocchild();
 	return true;
 }
 
@@ -269,3 +271,64 @@ void UMainUserWidget::CollapseEpcInput() {
 void UMainUserWidget::CollapseQuantityInput() {
 	this->OL_QuantityList->SetVisibility(ESlateVisibility::Collapsed);
 } 
+ 
+void UMainUserWidget::SubmitVoc() { 
+	TSharedPtr<FJsonObject> j = MakeShared<FJsonObject>();
+	 
+	j->SetStringField("uuid", ET_vocuuid->GetText().ToString());
+	if (ET_voctype->GetText().ToString() != "") j->SetStringField("vtype", ET_voctype->GetText().ToString());
+	if (ET_vocuri->GetText().ToString() != "") j->SetStringField("uri", ET_vocuri->GetText().ToString());
+
+	if (vocattrs.Num() > 0) j->SetArrayField("vocattr", vocattrs);
+	if (vocchilds.Num() > 0) j->SetArrayField("vochild", vocchilds);
+
+	FString OutputString;
+	TSharedRef<TJsonWriter<TCHAR>> JsonWriter = TJsonWriterFactory<>::Create(&OutputString);
+	FJsonSerializer::Serialize(j.ToSharedRef(), JsonWriter);
+
+	TMap<FString, FString> params;
+	params.Emplace("data", OutputString);
+	UApiReturn* apiret = MyHttpUtil::PostFormData(StrConst::Get().uri_add_voc, params);
+	if (apiret->IsStartOk()) {
+
+		UE_LOG(LogTemp, Warning, TEXT("request ok"));
+		//while (!apiret->IsCompleted());
+		UE_LOG(LogTemp, Warning, TEXT("request completed"));
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("request faield"));
+	}
+}
+
+
+void UMainUserWidget::InputVocattr() { 
+	this->OL_vocattr->SetVisibility(ESlateVisibility::Visible);
+
+	FString tip = FString::Printf(TEXT("Enter vocattr(already count %d)"), vocattrs.Num());
+	this->TB_inputvocattrtip->SetText(FText::FromString(tip));
+}
+
+void UMainUserWidget::SubmitVocAttr() {
+	this->CollapseVocattr();
+
+	TSharedPtr<FJsonObject> j = MakeShared<FJsonObject>();
+	j->SetStringField("name", this->ET_vocattrname->GetText().ToString());
+	j->SetStringField("value", this->ET_vocattrvalue->GetText().ToString());
+	auto j1 = MakeShareable(new FJsonValueObject(j));
+	this->vocattrs.Add(j1);
+}
+
+void UMainUserWidget::CollapseVocattr() {
+	this->OL_vocattr->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UMainUserWidget::SubmitVocchild() {
+	CollapseVocchild();
+
+	auto j1 = MakeShareable(new FJsonValueString(ET_childvocuuid->GetText().ToString()));
+	vocchilds.Add(j1);
+}
+
+void UMainUserWidget::CollapseVocchild() {
+	OL_vocchild->SetVisibility(ESlateVisibility::Collapsed);
+}
