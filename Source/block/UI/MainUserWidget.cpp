@@ -27,6 +27,7 @@ bool UMainUserWidget::Initialize() {
 	this->OL_QuantityList->SetVisibility(ESlateVisibility::Collapsed);
 	this->CollapseVocattr();
 	CollapseVocchild();
+	CollapseOknotify();
 	return true;
 }
 
@@ -292,10 +293,13 @@ void UMainUserWidget::SubmitVoc() {
 	if (apiret->IsStartOk()) {
 
 		UE_LOG(LogTemp, Warning, TEXT("request ok"));
-		//while (!apiret->IsCompleted());
+		NotifyOk("Sending Request Start");
+		//while (!apiret->IsCompleted()) {}
+		NotifyOk("Sending Request completed");
 		UE_LOG(LogTemp, Warning, TEXT("request completed"));
 	}
 	else {
+		NotifyOk("Sending Request failed");
 		UE_LOG(LogTemp, Warning, TEXT("request faield"));
 	}
 }
@@ -306,6 +310,14 @@ void UMainUserWidget::InputVocattr() {
 
 	FString tip = FString::Printf(TEXT("Enter vocattr(already count %d)"), vocattrs.Num());
 	this->TB_inputvocattrtip->SetText(FText::FromString(tip));
+}
+
+void UMainUserWidget::InputVocchild() {
+
+	OL_vocchild->SetVisibility(ESlateVisibility::Visible);
+
+	FString tip = FString::Printf(TEXT("Enter vocchild(already count %d)"), vocchilds.Num());
+	this->TB_vocchildtip->SetText(FText::FromString(tip));
 }
 
 void UMainUserWidget::SubmitVocAttr() {
@@ -321,7 +333,10 @@ void UMainUserWidget::SubmitVocAttr() {
 void UMainUserWidget::CollapseVocattr() {
 	this->OL_vocattr->SetVisibility(ESlateVisibility::Collapsed);
 }
-
+ 
+void UMainUserWidget::CollapseOknotify() {
+	this->OL_oknotify->SetVisibility(ESlateVisibility::Collapsed);
+}
 void UMainUserWidget::SubmitVocchild() {
 	CollapseVocchild();
 
@@ -331,4 +346,29 @@ void UMainUserWidget::SubmitVocchild() {
 
 void UMainUserWidget::CollapseVocchild() {
 	OL_vocchild->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UMainUserWidget::SubmitQueryVoc() {
+	TMap<FString, FString> params;
+
+	params.Emplace("uri", ET_queryvocuri->GetText().ToString());
+	auto apiret = MyHttpUtil::Get(StrConst::Get().uri_query_voc, params); 
+	if (apiret->IsStartOk()) {
+		UE_LOG(LogTemp, Warning, TEXT("request ok"));
+		//while (!apiret->IsCompleted());
+		UE_LOG(LogTemp, Warning, TEXT("request completed"));
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("request faield"));
+	}
+}
+
+FString UMainUserWidget::GetHostUri() {
+	return StrConst::Get().uri_host;
+}
+
+void UMainUserWidget::NotifyOk(FString tip) {
+
+	this->OL_oknotify->SetVisibility(ESlateVisibility::Visible);
+	TB_oknotify->SetText(FText::FromString(tip));
 }

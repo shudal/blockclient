@@ -51,3 +51,23 @@ UApiReturn* MyHttpUtil::PostFormData(FString url, TMap<FString, FString> Paramet
 }
  
 
+UApiReturn* MyHttpUtil::Get(FString url, TMap<FString, FString> Parameters) {
+	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
+	UApiReturn* ret = NewObject<UApiReturn>();
+	HttpRequest->OnProcessRequestComplete().BindUObject(ret, &UApiReturn::ProcessRequestCompleted);
+
+	HttpRequest->SetVerb("GET"); 
+
+	FString AllURL = url + "?"; 
+	TArray<FString>Keys; 
+	Parameters.GetKeys(Keys); 
+	for (size_t i = 0; i < Keys.Num(); i++)
+	{
+		if (i == 0) AllURL += Keys[i] + "=" + *Parameters.Find(Keys[i]);
+		else AllURL += "&" + Keys[i] + "=" + *Parameters.Find(Keys[i]);
+	}
+	HttpRequest->SetURL(AllURL);
+
+	ret->SetStartOk(HttpRequest->ProcessRequest());
+	return ret;
+}

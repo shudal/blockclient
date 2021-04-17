@@ -191,7 +191,17 @@ protected:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
-		class UOverlay* OL_vocchild = nullptr; 
+		class UOverlay* OL_vocchild = nullptr;   
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UTextBlock* TB_vocchildtip = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_queryvocuri = nullptr;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UOverlay* OL_oknotify = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UTextBlock* TB_oknotify = nullptr;
 		
 private:
 	void SetAllUGPState(ESlateVisibility v);
@@ -217,6 +227,8 @@ protected:
 		void InputQuantity(EQuantityType qt);
 	UFUNCTION(BlueprintCallable)
 		void InputVocattr();
+	UFUNCTION(BlueprintCallable)
+		void InputVocchild();
 
 	UFUNCTION(BlueprintCallable)
 		void SubmitTypeValue();
@@ -241,7 +253,18 @@ protected:
 		void CollapseVocattr();
 	UFUNCTION(BlueprintCallable)
 		void CollapseVocchild();
+	UFUNCTION(BlueprintCallable)
+		void CollapseOknotify();
 
+
+	UFUNCTION(BlueprintCallable)
+		void SubmitQueryVoc();
+
+
+	UFUNCTION(BlueprintCallable)
+		FString GetHostUri();
+	UFUNCTION(BlueprintCallable)
+		void NotifyOk(FString tip);
 public:
 
 	virtual bool Initialize() override;

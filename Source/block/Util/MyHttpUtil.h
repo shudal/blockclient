@@ -15,6 +15,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 		static UApiReturn* PostFormData(FString url, TMap<FString, FString> Parameters);
+	UFUNCTION(BlueprintCallable)
+		static UApiReturn* Get(FString url, TMap<FString, FString> Parameters);
 
 };
  
