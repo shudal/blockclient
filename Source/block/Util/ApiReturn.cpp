@@ -25,10 +25,14 @@ void UApiReturn::SetSuccess(bool x) {
 }
 void UApiReturn::ProcessRequestCompleted(FHttpRequestPtr request, FHttpResponsePtr response, bool bWasSuccessful) {
 
+	//static int x = 0;
+	//x++;
+	//UE_LOG(LogTemp, Warning, TEXT("%d"), x);
 	TArray<uint8> byteArray;
 	
 	if (response)
 	{
+
 		FString content1, content2 = "";
 		int code;
 
@@ -41,11 +45,13 @@ void UApiReturn::ProcessRequestCompleted(FHttpRequestPtr request, FHttpResponseP
 
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *content2);
 
-		JRet = MakeShared<FJsonObject>();
-		TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(response->GetContentAsString());
-		FJsonSerializer::Deserialize(JsonReader, JRet);
-		
-		SetSuccess(true);
+		if (bWasSuccessful) { 
+			JRet = MakeShared<FJsonObject>();
+			TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(response->GetContentAsString());
+			bool ok = FJsonSerializer::Deserialize(JsonReader, JRet);
+
+			if (ok) SetSuccess(true);
+		}
 	};
  
 	SetCompleted(true);

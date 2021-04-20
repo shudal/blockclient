@@ -93,6 +93,42 @@ void UMainUserWidget::SetAllUGPState(ESlateVisibility v) {
 	UGP_OutputQuantityList->SetVisibility(v);
 }
 
+class MyRunnable : public FRunnable {
+public:
+	TQueue<FConfirmMsg>* ConfirmMsgs = nullptr;
+	UApiReturn* apiret = nullptr;
+	virtual uint32 Run() {
+		while (!apiret->IsCompleted());    
+		if (apiret->IsSuccess()) {
+			if (apiret->JRet.IsValid()) {
+				ConfirmMsgs->Enqueue(FConfirmMsg(TEXT("request success, jret valid")));
+
+				if (apiret->JRet->HasField("code")) {
+					int32 code = apiret->JRet->GetIntegerField("code");
+					if (code == 0) {
+						ConfirmMsgs->Enqueue(FConfirmMsg(TEXT("request succeess, code = 0")));
+					}
+					else {
+						ConfirmMsgs->Enqueue(FConfirmMsg(TEXT("request succeess, but code != 0")));
+					}
+				}
+				else {
+					ConfirmMsgs->Enqueue(FConfirmMsg(TEXT("request fsuccess, but no code")));
+				}
+			}
+			else {
+				ConfirmMsgs->Enqueue(FConfirmMsg(TEXT("request succeess, but JRet not valid")));
+
+			}
+		}
+		else {
+			ConfirmMsgs->Enqueue(FConfirmMsg(TEXT("request failed")));
+		}
+			// UE_LOG(LogTemp, Warning, TEXT("request completed"));
+			//ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request completed")));
+		return 0;
+	}; // 运行 runnable 对象 
+};
 void UMainUserWidget::SubmitEvent() {
 	TSharedPtr<FJsonObject> j = MakeShared<FJsonObject>();
 	
@@ -158,30 +194,44 @@ void UMainUserWidget::SubmitEvent() {
 	UApiReturn* apiret = MyHttpUtil::PostFormData(StrConst::Get().uri_add_event, params);
 	if (apiret->IsStartOk()) {
 
-		UE_LOG(LogTemp, Warning, TEXT("request ok"));
-		//while (!apiret->IsCompleted());
-		FThread t(TEXT("hi"), [=]()->void {
-			while (!apiret->IsCompleted()) { 
-				ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request not completed")));
-			}
-			
-			if (apiret->JRet->HasField("code")) {
-				int32 code = apiret->JRet->GetIntegerField("code");
-				if (code == 0) { 
-					ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request succeess")));
+		ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request start"))); 
+		/*
+		// this is OK:
+		auto r = new MyRunnable();
+		r->apiret = apiret;
+		r->ConfirmMsgs = &ConfirmMsgs;
+		FRunnableThread* RunnableThread = FRunnableThread::Create(r, TEXT("LaLaLaDeMaXiYa!"));
+		*/
+		// this is also OK:
+		FThread* t = new FThread(TEXT("hi"), [=]()->void {
+			while (!apiret->IsCompleted());
+			if (apiret->IsSuccess()) {
+				if (apiret->JRet.IsValid()) {
+					ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request success, jret valid")));
+
+					if (apiret->JRet->HasField("code")) {
+						int32 code = apiret->JRet->GetIntegerField("code");
+						if (code == 0) {
+							ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request succeess, code = 0")));
+						}
+						else {
+							ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request succeess, but code != 0")));
+						}
+					}
+					else {
+						ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request fsuccess, but no code")));
+					}
 				}
-				else { 
-					ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request failed, code != 0")));
+				else {
+					ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request succeess, but JRet not valid")));
+
 				}
 			}
-			else { 
-				ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request failed, no code")));
+			else {
+				ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request failed")));
 			}
-			// UE_LOG(LogTemp, Warning, TEXT("request completed"));
-			//ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request completed")));
 		});
-		t.Execute();
-		//t.Join();
+		t->Execute();
 	}
 	else {
 		ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request faield"))); 
