@@ -41,6 +41,20 @@ enum class EQuantityType : uint8 {
 	OutQuantitylist = 3,
 };
 
+USTRUCT(BlueprintType)
+struct FConfirmMsg
+{
+	GENERATED_BODY()
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString msg;
+
+	FConfirmMsg() = default;
+	FConfirmMsg(FString x) {
+		msg = x;
+	}
+};
+
 /**
  * 
  */
@@ -70,7 +84,9 @@ private:
 	TArray<TSharedPtr<FJsonValue>> vocattrs;
 	TArray<TSharedPtr<FJsonValue>> vocchilds;
 
+
 protected:
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UWidgetSwitcher* MyWS = nullptr;
 
@@ -203,6 +219,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UTextBlock* TB_oknotify = nullptr;
 		
+public: 
+
+		TQueue<FConfirmMsg> ConfirmMsgs;
 private:
 	void SetAllUGPState(ESlateVisibility v);
 protected:
@@ -264,8 +283,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		FString GetHostUri();
 	UFUNCTION(BlueprintCallable)
-		void NotifyOk(FString tip);
+		void NotifyConfirm(FString tip);
 public:
 
 	virtual bool Initialize() override;
+	FTimerHandle TimerHandle_DefaultTimer;
+	void DefaultTimer();
 };

@@ -22,7 +22,7 @@ protected:
 	bool bCompleted=false;
 	bool bSuccess=false;
 public:
-	TSharedPtr<FJsonObject> JRet;
+	TSharedPtr<FJsonObject> JRet = nullptr;
 
 	//UApiReturn(); 
 	void ProcessRequestCompleted(FHttpRequestPtr request, FHttpResponsePtr response, bool bWasSuccessful);

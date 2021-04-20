@@ -13,7 +13,7 @@
 #include "../Config/StrConst.h"
 #include "Components/ComboBoxString.h"
 #include "../Util/MyHttpUtil.h"
-
+#include "../Util/FThreadUtils.h"
 
 
 bool UMainUserWidget::Initialize() {
@@ -28,6 +28,8 @@ bool UMainUserWidget::Initialize() {
 	this->CollapseVocattr();
 	CollapseVocchild();
 	CollapseOknotify();
+
+	if (GetWorld() != nullptr) GetWorld()->GetTimerManager().SetTimer(TimerHandle_DefaultTimer, this, &UMainUserWidget::DefaultTimer, 1.0f, true);
 	return true;
 }
 
@@ -158,10 +160,31 @@ void UMainUserWidget::SubmitEvent() {
 
 		UE_LOG(LogTemp, Warning, TEXT("request ok"));
 		//while (!apiret->IsCompleted());
-		UE_LOG(LogTemp, Warning, TEXT("request completed"));
+		FThread t(TEXT("hi"), [=]()->void {
+			while (!apiret->IsCompleted()) { 
+				ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request not completed")));
+			}
+			
+			if (apiret->JRet->HasField("code")) {
+				int32 code = apiret->JRet->GetIntegerField("code");
+				if (code == 0) { 
+					ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request succeess")));
+				}
+				else { 
+					ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request failed, code != 0")));
+				}
+			}
+			else { 
+				ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request failed, no code")));
+			}
+			// UE_LOG(LogTemp, Warning, TEXT("request completed"));
+			//ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request completed")));
+		});
+		t.Execute();
+		//t.Join();
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("request faield"));
+		ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request faield"))); 
 	} 
 }
 
@@ -293,13 +316,14 @@ void UMainUserWidget::SubmitVoc() {
 	if (apiret->IsStartOk()) {
 
 		UE_LOG(LogTemp, Warning, TEXT("request ok"));
-		NotifyOk("Sending Request Start");
+		NotifyConfirm("Sending Request Start");
 		//while (!apiret->IsCompleted()) {}
-		NotifyOk("Sending Request completed");
+		//FRunnableThread* th = FRunnableThread::Create([]()->{},"i");
+		NotifyConfirm("Sending Request completed");
 		UE_LOG(LogTemp, Warning, TEXT("request completed"));
 	}
 	else {
-		NotifyOk("Sending Request failed");
+		NotifyConfirm("Sending Request failed");
 		UE_LOG(LogTemp, Warning, TEXT("request faield"));
 	}
 }
@@ -355,7 +379,12 @@ void UMainUserWidget::SubmitQueryVoc() {
 	auto apiret = MyHttpUtil::Get(StrConst::Get().uri_query_voc, params); 
 	if (apiret->IsStartOk()) {
 		UE_LOG(LogTemp, Warning, TEXT("request ok"));
-		//while (!apiret->IsCompleted());
+		//while (!apiret->IsCompleted()); 
+		FThread t(TEXT("hi"), [&]()->void {
+			while (!apiret->IsCompleted());
+		});
+		t.Execute();
+		t.Join();
 		UE_LOG(LogTemp, Warning, TEXT("request completed"));
 	}
 	else {
@@ -367,8 +396,18 @@ FString UMainUserWidget::GetHostUri() {
 	return StrConst::Get().uri_host;
 }
 
-void UMainUserWidget::NotifyOk(FString tip) {
+void UMainUserWidget::NotifyConfirm(FString tip) {
 
 	this->OL_oknotify->SetVisibility(ESlateVisibility::Visible);
 	TB_oknotify->SetText(FText::FromString(tip));
+}
+
+void UMainUserWidget::DefaultTimer() {
+	if (ConfirmMsgs.IsEmpty() == false) {
+		FConfirmMsg msg;
+		bool x = ConfirmMsgs.Dequeue(msg);
+		if (x) {
+			NotifyConfirm(msg.msg);
+		}
+	}
 }
