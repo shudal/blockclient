@@ -13,8 +13,8 @@
 #include "../Config/StrConst.h"
 #include "Components/ComboBoxString.h"
 #include "../Util/MyHttpUtil.h"
-#include "../Util/FThreadUtils.h"
-
+#include "../Util/FThreadUtils.h" 
+#include "Http.h"
 
 bool UMainUserWidget::Initialize() {
 	if (!Super::Initialize()) {
@@ -33,8 +33,28 @@ bool UMainUserWidget::Initialize() {
 	return true;
 }
 
-void UMainUserWidget::SwitchWidgetTo(int32 i) {
-	verifyf(i >= 0 && i < 4, TEXT("i not right,i=%d"), i);
+void UMainUserWidget::SwitchWidgetTo(EUIType t) {
+	const int32 maxi = 4;
+	int32 i = 0;
+	switch (t) { 
+	case EUIType::EventAdd:
+		i = 0;
+		break;
+	case EUIType::VocAdd:
+		i = 1;
+		break;
+	case EUIType::VocQuery:
+		i = 2;
+		break;
+	case EUIType::Settings:
+		i = 3;
+		break;
+	case EUIType::VocShow:
+		i = 4;
+		break;
+	}
+
+	verifyf(i >= 0 && i <= maxi, TEXT("i not right,i=%d"), i);
 	if (MyWS != nullptr) {
 		MyWS->SetActiveWidgetIndex(i);
 	}
@@ -161,6 +181,14 @@ void UMainUserWidget::SubmitEvent() {
 		FThread* t = new FThread(TEXT("hi"), [=]()->void {
 			while (!apiret->IsCompleted());	
 			ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request completed")));
+
+			if (apiret->GetRes() != nullptr) {
+				FString content1, content2 = "";
+				apiret->GetRes()->GetHeader(content1);
+				content2 = apiret->GetRes()->GetContentAsString();
+				content2.Append(content1);
+				ConfirmMsgs.Enqueue(FConfirmMsg(FString::Printf(TEXT("%s"), *content2)));
+			}
 
 			if (apiret->IsSuccess()) {  
 				if (apiret->JRet->HasField("code")) {
@@ -315,7 +343,13 @@ void UMainUserWidget::SubmitVoc() {
 		FThread* t = new FThread(TEXT("hi"), [=]()->void {
 			while (!apiret->IsCompleted()); 
 			ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request completed")));
-
+			if (apiret->GetRes() != nullptr) {
+				FString content1, content2 = "";
+				apiret->GetRes()->GetHeader(content1);
+				content2 = apiret->GetRes()->GetContentAsString();
+				content2.Append(content1);
+				ConfirmMsgs.Enqueue(FConfirmMsg(FString::Printf(TEXT("%s"), *content2)));
+			}
 			if (apiret->IsSuccess()) {
 				if (apiret->JRet->HasField("code")) {
 					int32 code = apiret->JRet->GetIntegerField("code");
@@ -373,6 +407,7 @@ void UMainUserWidget::CollapseVocattr() {
  
 void UMainUserWidget::CollapseOknotify() {
 	this->OL_oknotify->SetVisibility(ESlateVisibility::Collapsed);
+	SetIsViewingNotifyConfirm(false);
 }
 void UMainUserWidget::SubmitVocchild() {
 	CollapseVocchild();
@@ -391,17 +426,66 @@ void UMainUserWidget::SubmitQueryVoc() {
 	params.Emplace("uri", ET_queryvocuri->GetText().ToString());
 	auto apiret = MyHttpUtil::Get(StrConst::Get().uri_query_voc, params); 
 	if (apiret->IsStartOk()) {
-		UE_LOG(LogTemp, Warning, TEXT("request ok"));
-		//while (!apiret->IsCompleted()); 
-		FThread t(TEXT("hi"), [&]()->void {
+		ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("sending request")));
+		FThread* t = new FThread(TEXT("hi"), [=]()->void {
 			while (!apiret->IsCompleted());
+			ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request completed")));
+			if (apiret->GetRes() != nullptr) {
+				FString content1, content2 = "";
+				apiret->GetRes()->GetHeader(content1);
+				content2 = apiret->GetRes()->GetContentAsString();
+				content2.Append(content1);
+				ConfirmMsgs.Enqueue(FConfirmMsg(FString::Printf(TEXT("%s"), *content2)));
+			}
+			if (apiret->IsSuccess()) {
+				if (apiret->JRet->HasField("code")) {
+					int32 code = apiret->JRet->GetIntegerField("code");
+					if (code == 0) {
+						ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request succeess, code = 0")));
+						//ConfirmMsgs.Enqueue(FConfirmMsg(FString::Printf(TEXT("%s"),apiret->JRet->GetStringField(""))));
+						auto ret = apiret->JRet;
+						auto dataJO = ret->GetObjectField("data");
+						auto vocall = dataJO->GetArrayField("vocall");
+						auto events = dataJO->GetArrayField("events");
+
+						TMap < FString, TArray<TSharedPtr<FJsonObject>>> vocs;
+						for (auto& vocv : vocall) {
+							auto voc = vocv->AsObject();
+							auto unikey = voc->GetStringField("uri");
+							
+							if (!vocs.Contains(unikey)) vocs.Add(unikey);
+							vocs[unikey].Emplace(voc);
+						}
+
+						TArray<FString>Keys;
+						vocs.GetKeys(Keys);
+						for (auto & k : Keys) {
+							auto& arr = vocs[k];
+							for (auto& j : arr) {
+								FString OutputString;
+								TSharedRef<TJsonWriter<TCHAR>> JsonWriter = TJsonWriterFactory<>::Create(&OutputString);
+								FJsonSerializer::Serialize(j.ToSharedRef(), JsonWriter);
+								UE_LOG(LogTemp, Warning, TEXT("%s"), *OutputString);
+							}
+						}
+						 
+					}
+					else {
+						ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request succeess, but code != 0")));
+					}
+				}
+				else {
+					ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request success, but no code")));
+				}
+			}
+			else {
+				ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request failed")));
+			}
 		});
-		t.Execute();
-		t.Join();
-		UE_LOG(LogTemp, Warning, TEXT("request completed"));
+		t->Execute();
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("request faield"));
+		ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("sending request failed")));
 	}
 }
 
@@ -410,17 +494,26 @@ FString UMainUserWidget::GetHostUri() {
 }
 
 void UMainUserWidget::NotifyConfirm(FString tip) {
-
+	SetIsViewingNotifyConfirm(true);
 	this->OL_oknotify->SetVisibility(ESlateVisibility::Visible);
 	TB_oknotify->SetText(FText::FromString(tip));
+	
 }
 
 void UMainUserWidget::DefaultTimer() {
-	if (ConfirmMsgs.IsEmpty() == false) {
+	if (ConfirmMsgs.IsEmpty() == false && IsViewingNotifyConfirm() == false) {
 		FConfirmMsg msg;
 		bool x = ConfirmMsgs.Dequeue(msg);
 		if (x) {
 			NotifyConfirm(msg.msg);
 		}
 	}
+}
+
+void UMainUserWidget::SetIsViewingNotifyConfirm(bool x) {
+	bIsViewingNotifyConfirm = x;
+}
+
+bool UMainUserWidget::IsViewingNotifyConfirm() {
+	return bIsViewingNotifyConfirm;
 }

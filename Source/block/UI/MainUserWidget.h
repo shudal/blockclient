@@ -39,7 +39,17 @@ enum class EQuantityType : uint8 {
 	Quantitylist = 1, 
 	InQuantitylist = 2, 
 	OutQuantitylist = 3,
+}; 
+UENUM(BlueprintType)
+enum class EUIType : uint8 {
+	// must same as IntConst
+	EventAdd = 0,
+	VocAdd = 1,
+	VocQuery = 2,
+	Settings = 3,
+	VocShow =4
 };
+
 
 USTRUCT(BlueprintType)
 struct FConfirmMsg
@@ -84,7 +94,7 @@ private:
 	TArray<TSharedPtr<FJsonValue>> vocattrs;
 	TArray<TSharedPtr<FJsonValue>> vocchilds;
 
-
+	bool bIsViewingNotifyConfirm = false;
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
@@ -224,10 +234,12 @@ public:
 		TQueue<FConfirmMsg> ConfirmMsgs;
 private:
 	void SetAllUGPState(ESlateVisibility v);
+	void SetIsViewingNotifyConfirm(bool x);
+	bool IsViewingNotifyConfirm();
 protected:
 
 	UFUNCTION(BlueprintCallable)
-		void SwitchWidgetTo(int32 i);
+		void SwitchWidgetTo(EUIType t);
 	 
 	UFUNCTION(BlueprintCallable)
 		void SetFormLayoutFromEventType(FString ets);

@@ -32,6 +32,7 @@ void UApiReturn::ProcessRequestCompleted(FHttpRequestPtr request, FHttpResponseP
 	
 	if (response)
 	{
+		this->res = response;
 
 		FString content1, content2 = "";
 		int code;
