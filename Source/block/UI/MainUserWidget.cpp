@@ -9,12 +9,15 @@
 #include "Components/EditableTextBox.h" 
 #include "Components/Overlay.h"
 #include "Components/TextBlock.h"
+#include "Components/ListView.h"
 #include "Json.h"
 #include "../Config/StrConst.h"
 #include "Components/ComboBoxString.h"
 #include "../Util/MyHttpUtil.h"
 #include "../Util/FThreadUtils.h" 
+#include "VocCardItem.h"
 #include "Http.h"
+#include "EventCardItem.h"
 
 bool UMainUserWidget::Initialize() {
 	if (!Super::Initialize()) {
@@ -448,6 +451,13 @@ void UMainUserWidget::SubmitQueryVoc() {
 						auto vocall = dataJO->GetArrayField("vocall");
 						auto events = dataJO->GetArrayField("events");
 
+						TArray<TSharedPtr<FJsonObject>> ejs;
+						for (auto& e : events) {
+							auto ej = e->AsObject();
+							ejs.Add(ej);
+						}
+
+
 						TMap < FString, TArray<TSharedPtr<FJsonObject>>> vocs;
 						for (auto& vocv : vocall) {
 							auto voc = vocv->AsObject();
@@ -457,17 +467,10 @@ void UMainUserWidget::SubmitQueryVoc() {
 							vocs[unikey].Emplace(voc);
 						}
 
-						TArray<FString>Keys;
-						vocs.GetKeys(Keys);
-						for (auto & k : Keys) {
-							auto& arr = vocs[k];
-							for (auto& j : arr) {
-								FString OutputString;
-								TSharedRef<TJsonWriter<TCHAR>> JsonWriter = TJsonWriterFactory<>::Create(&OutputString);
-								FJsonSerializer::Serialize(j.ToSharedRef(), JsonWriter);
-								UE_LOG(LogTemp, Warning, TEXT("%s"), *OutputString);
-							}
-						}
+
+						SetEventItems(ejs);
+						SetVocCardItems(vocs);
+						SetWhetherSetVocCard(true);
 						 
 					}
 					else {
@@ -507,6 +510,40 @@ void UMainUserWidget::DefaultTimer() {
 		if (x) {
 			NotifyConfirm(msg.msg);
 		}
+	}
+
+
+	if (IsSetVocCard()) { 
+		LV_VocCard->ClearListItems();
+
+		auto vocs = GetVocCardItems();
+		TArray<FString>Keys;
+		vocs.GetKeys(Keys);
+		for (auto& k : Keys) {
+			auto& arr = vocs[k];
+			for (auto& j : arr) {
+				FString OutputString;
+				TSharedRef<TJsonWriter<TCHAR>> JsonWriter = TJsonWriterFactory<>::Create(&OutputString);
+				FJsonSerializer::Serialize(j.ToSharedRef(), JsonWriter);
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *OutputString);
+			}
+
+			auto ci = NewObject<UVocCardItem>();
+			ci->SetVocs(vocs[k]);
+			LV_VocCard->AddItem(ci);
+		}
+		 
+	
+		SetWhetherSetVocCard(false);
+
+		LV_EventCard->ClearListItems();
+		for (auto& e : EventItems) {
+			auto eo = NewObject<UEventCardItem>();
+			eo->SetEventCardItem(e);
+			LV_EventCard->AddItem(eo);
+		}
+
+		this->SwitchWidgetTo(EUIType::VocShow);
 	}
 }
 

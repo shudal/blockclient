@@ -60,4 +60,6 @@ public:
 	FString uri_add_event = uri_host + "event/add";
 	FString uri_add_voc = uri_host + "voc/add/voc";
 	FString uri_query_voc = uri_host + "event/query/epc";
+
+	FString VOC_DES = "voc_des";
 };

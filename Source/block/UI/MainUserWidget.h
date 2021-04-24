@@ -228,6 +228,13 @@ protected:
 		class UOverlay* OL_oknotify = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UTextBlock* TB_oknotify = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UListView* LV_VocCard = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UListView* LV_EventCard = nullptr;
+	
 		
 public: 
 
@@ -236,6 +243,15 @@ private:
 	void SetAllUGPState(ESlateVisibility v);
 	void SetIsViewingNotifyConfirm(bool x);
 	bool IsViewingNotifyConfirm();
+
+	TArray<TSharedPtr<FJsonObject>> EventItems;
+	FORCEINLINE void SetEventItems(TArray<TSharedPtr<FJsonObject>> arr) { this->EventItems = arr; }
+	TMap < FString, TArray<TSharedPtr<FJsonObject>>> VocCardItems;
+	FORCEINLINE void SetVocCardItems(TMap < FString, TArray<TSharedPtr<FJsonObject>>> arr) { VocCardItems = arr; }
+	FORCEINLINE TMap < FString, TArray<TSharedPtr<FJsonObject>>>& GetVocCardItems() { return VocCardItems; }
+	bool bWhetherSetVocCard = false;
+	FORCEINLINE bool IsSetVocCard() { return bWhetherSetVocCard; }
+	FORCEINLINE void SetWhetherSetVocCard(bool x) { bWhetherSetVocCard = x; }
 protected:
 
 	UFUNCTION(BlueprintCallable)
