@@ -252,6 +252,8 @@ private:
 	bool bWhetherSetVocCard = false;
 	FORCEINLINE bool IsSetVocCard() { return bWhetherSetVocCard; }
 	FORCEINLINE void SetWhetherSetVocCard(bool x) { bWhetherSetVocCard = x; }
+	
+	void SetDefaultEventAddField();
 protected:
 
 	UFUNCTION(BlueprintCallable)

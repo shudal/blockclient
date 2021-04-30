@@ -13,6 +13,10 @@ UApiReturn::UApiReturn()
 	bSuccess = false;
 } 
 */
+
+UApiReturn::~UApiReturn() {
+	UE_LOG(LogTemp, Warning, TEXT("uapireturn destruct") );
+}
 void UApiReturn::SetStartOk(bool x) {
 	bStartOk = x;
 }

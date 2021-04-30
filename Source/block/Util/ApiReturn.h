@@ -23,6 +23,8 @@ protected:
 	bool bCompleted=false;
 	bool bSuccess=false;
 public:
+	~UApiReturn();
+
 	TSharedPtr<FJsonObject> JRet = nullptr;
 
 	//UApiReturn(); 

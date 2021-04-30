@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "MainUserWidget.h"
@@ -18,6 +18,9 @@
 #include "VocCardItem.h"
 #include "Http.h"
 #include "EventCardItem.h"
+#include "Math/UnrealMathUtility.h"
+#include "Misc/DateTime.h"
+
 
 bool UMainUserWidget::Initialize() {
 	if (!Super::Initialize()) {
@@ -32,11 +35,33 @@ bool UMainUserWidget::Initialize() {
 	CollapseVocchild();
 	CollapseOknotify();
 
+
+	SetDefaultEventAddField();
 	if (GetWorld() != nullptr) GetWorld()->GetTimerManager().SetTimer(TimerHandle_DefaultTimer, this, &UMainUserWidget::DefaultTimer, 1.0f, true);
+	
+	/*
+	ET_queryvocuri->SetText(FText::FromString("mjh::product::productid002"));
+	this->SubmitQueryVoc();
+	*/
 	return true;
 }
 
-void UMainUserWidget::SwitchWidgetTo(EUIType t) {
+void UMainUserWidget::SetDefaultEventAddField() {
+	FString tmp_s = TEXT("abcdefghijklmnopqrstuvwxyz0123456789_");
+	FString rands;
+	for (int32 i = 0; i < 256; i++) {
+		auto idx = FMath::RandHelper(tmp_s.Len());
+		rands.AppendChar(tmp_s.GetCharArray()[idx]);
+	}
+	ET_uuid->SetText(FText::FromString(rands));
+
+	auto tmpx = FDateTime::Now().ToUnixTimestamp();
+	ET_eventtime->SetText(FText::FromString(FString::FromInt(tmpx)));
+	ET_recordtime->SetText(FText::FromString(FString::FromInt(tmpx + 10)));
+	ET_timezoneoff->SetText(FText::FromString("UTC+08:00"));
+}
+void UMainUserWidget::SwitchWidgetTo(EUIType t) { 
+	SetDefaultEventAddField();
 	const int32 maxi = 4;
 	int32 i = 0;
 	switch (t) { 
@@ -209,6 +234,8 @@ void UMainUserWidget::SubmitEvent() {
 			} else {
 				ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request failed")));
 			}
+
+			apiret->RemoveFromRoot();
 		});
 		t->Execute();
 	} else {
@@ -370,6 +397,8 @@ void UMainUserWidget::SubmitVoc() {
 			else {
 				ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request failed")));
 			}
+
+			apiret->RemoveFromRoot();
 		});
 		t->Execute();  
 	}
@@ -432,8 +461,10 @@ void UMainUserWidget::SubmitQueryVoc() {
 		ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("sending request")));
 		FThread* t = new FThread(TEXT("hi"), [=]()->void {
 			while (!apiret->IsCompleted());
+
+			UE_LOG(LogTemp, Warning, TEXT("request completed"));
 			ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request completed")));
-			if (apiret->GetRes() != nullptr) {
+			if (apiret->GetRes()) {
 				FString content1, content2 = "";
 				apiret->GetRes()->GetHeader(content1);
 				content2 = apiret->GetRes()->GetContentAsString();
@@ -484,6 +515,7 @@ void UMainUserWidget::SubmitQueryVoc() {
 			else {
 				ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request failed")));
 			}
+			apiret->RemoveFromRoot();
 		});
 		t->Execute();
 	}
@@ -537,12 +569,16 @@ void UMainUserWidget::DefaultTimer() {
 		SetWhetherSetVocCard(false);
 
 		LV_EventCard->ClearListItems();
+		
+		UE_LOG(LogTemp, Warning, TEXT("event list count: %d"), EventItems.Num());
 		for (auto& e : EventItems) {
 			auto eo = NewObject<UEventCardItem>();
 			eo->SetEventCardItem(e);
 			LV_EventCard->AddItem(eo);
-		}
-
+		} 
+		
+		LV_EventCard->ScrollIndexIntoView(EventItems.Num()-1);
+		
 		this->SwitchWidgetTo(EUIType::VocShow);
 	}
 }

@@ -137,7 +137,7 @@ FString UEventCardUserWidget::FormatMyTypeValue(const TArray<TSharedPtr<FJsonVal
 		auto t = j->GetStringField(StrConst::Get().TYPEVALUE_TYPE);
 		auto v = j->GetStringField(StrConst::Get().TYPEVALUE_VALUE);
 		subs = FString::Printf(TEXT("Type: %s; Value: %s"), *t, *v);
-		s = s + subs + "\n";
+		s = s + subs + "    ";
 	}
 	return s;
 }

@@ -13,6 +13,7 @@ MyHttpUtil::~MyHttpUtil()
 UApiReturn* MyHttpUtil::PostFormData(FString url, TMap<FString, FString> Parameters) { 
 	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest(); 
 	UApiReturn* ret = NewObject<UApiReturn>();
+	ret->AddToRoot();
 	HttpRequest->OnProcessRequestComplete().BindUObject(ret, &UApiReturn::ProcessRequestCompleted);
 	
 	FString Boundary = "---------------------------" + FString::FromInt(FDateTime::Now().GetTicks());
@@ -54,6 +55,7 @@ UApiReturn* MyHttpUtil::PostFormData(FString url, TMap<FString, FString> Paramet
 UApiReturn* MyHttpUtil::Get(FString url, TMap<FString, FString> Parameters) {
 	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 	UApiReturn* ret = NewObject<UApiReturn>();
+	ret->AddToRoot();
 	HttpRequest->OnProcessRequestComplete().BindUObject(ret, &UApiReturn::ProcessRequestCompleted);
 
 	HttpRequest->SetVerb("GET"); 
