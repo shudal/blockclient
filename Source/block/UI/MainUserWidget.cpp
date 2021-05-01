@@ -20,6 +20,7 @@
 #include "EventCardItem.h"
 #include "Math/UnrealMathUtility.h"
 #include "Misc/DateTime.h"
+#include "UObject/GCObjectScopeGuard.h"
 
 
 bool UMainUserWidget::Initialize() {
@@ -207,6 +208,7 @@ void UMainUserWidget::SubmitEvent() {
 	if (apiret->IsStartOk()) { 
 		ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("sending request")));  
 		FThread* t = new FThread(TEXT("hi"), [=]()->void {
+			FGCObjectScopeGuard guard(apiret);
 			while (!apiret->IsCompleted());	
 			ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request completed")));
 
@@ -233,9 +235,7 @@ void UMainUserWidget::SubmitEvent() {
 				} 
 			} else {
 				ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request failed")));
-			}
-
-			apiret->RemoveFromRoot();
+			} 
 		});
 		t->Execute();
 	} else {
@@ -371,6 +371,7 @@ void UMainUserWidget::SubmitVoc() {
 	if (apiret->IsStartOk()) { 
 		ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("sending request"))); 
 		FThread* t = new FThread(TEXT("hi"), [=]()->void {
+			FGCObjectScopeGuard guard(apiret);
 			while (!apiret->IsCompleted()); 
 			ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request completed")));
 			if (apiret->GetRes() != nullptr) {
@@ -396,9 +397,7 @@ void UMainUserWidget::SubmitVoc() {
 			}
 			else {
 				ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request failed")));
-			}
-
-			apiret->RemoveFromRoot();
+			} 
 		});
 		t->Execute();  
 	}
@@ -460,6 +459,8 @@ void UMainUserWidget::SubmitQueryVoc() {
 	if (apiret->IsStartOk()) {
 		ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("sending request")));
 		FThread* t = new FThread(TEXT("hi"), [=]()->void {
+			FGCObjectScopeGuard guard(apiret);
+
 			while (!apiret->IsCompleted());
 
 			UE_LOG(LogTemp, Warning, TEXT("request completed"));
@@ -515,7 +516,6 @@ void UMainUserWidget::SubmitQueryVoc() {
 			else {
 				ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request failed")));
 			}
-			apiret->RemoveFromRoot();
 		});
 		t->Execute();
 	}
