@@ -16,6 +16,8 @@ class BLOCK_API UEventCardUserWidget : public UUserWidget
 
 private:
 	FString FormatMyTypeValue(const TArray<TSharedPtr<FJsonValue>>* arrp);
+	FString GetStrFromStrList(const TArray<TSharedPtr<FJsonValue>>& strlist);
+	FString GetStrFromQuantityList(const TArray<TSharedPtr<FJsonValue>>& quans);
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UTextBlock* TB_EType = nullptr;

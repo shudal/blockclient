@@ -94,41 +94,91 @@ void UEventCardUserWidget::SetListItemObject(UEventCardItem* i) {
 			auto s = FormatMyTypeValue(arrp);
 			TB_destlist->SetText(FText::FromString(s));
 		}
+	} 
+	FString str_epc = "";
+	FString str_inepc = "";
+	FString str_outepc = "";
+	FString str_childepc = "";
+	{  
+		auto epcs = eventJO->GetArrayField(StrConst::Get().EPC_LIST);
+		if (epcs.Num() > 0) {
+			str_epc = GetStrFromStrList(epcs); 
+		}
+		auto childepcs = eventJO->GetArrayField(StrConst::Get().CHILD_EPCS);
+		if (childepcs.Num() > 0) {
+			str_childepc = GetStrFromStrList(childepcs);
+		}
+		auto inepcs = eventJO->GetArrayField(StrConst::Get().INPUT_LIST);
+		if (inepcs.Num() > 0) {
+			str_inepc = GetStrFromStrList(inepcs);
+		}
+		auto outepcs = eventJO->GetArrayField(StrConst::Get().OUTPUT_LIST);
+		if (outepcs.Num() > 0) {
+			str_outepc = GetStrFromStrList(outepcs);
+		}
+	}
+	{
+		auto quans = eventJO->GetArrayField(StrConst::Get().QUANTITY_LIST);
+		if (quans.Num() > 0) {
+
+		}
 	}
 	EEventType et = static_cast<EEventType>(event_type_idx);
 	switch (et) {
 	case EEventType::Object:
+		/*
 		UGP_parentid->SetVisibility(ESlateVisibility::Collapsed); 
-		UGP_transid->SetVisibility(ESlateVisibility::Collapsed);
-		
-
+		UGP_transid->SetVisibility(ESlateVisibility::Collapsed); 
 		UGP_inputepcs->SetVisibility(ESlateVisibility::Collapsed);
 		UGP_outepcs->SetVisibility(ESlateVisibility::Collapsed);
 		UGP_inquanlist->SetVisibility(ESlateVisibility::Collapsed);
 		UGP_outquanlist->SetVisibility(ESlateVisibility::Collapsed);
+		*/
+		TB_epclist->SetText(FText::FromString(str_epc));
+		
 		break;
 	case EEventType::Aggregation:
-		UGP_transid->SetVisibility(ESlateVisibility::Collapsed);
-
+		/*
+		UGP_transid->SetVisibility(ESlateVisibility::Collapsed); 
 		UGP_inputepcs->SetVisibility(ESlateVisibility::Collapsed);
 		UGP_outepcs->SetVisibility(ESlateVisibility::Collapsed);
 		UGP_inquanlist->SetVisibility(ESlateVisibility::Collapsed);
 		UGP_outquanlist->SetVisibility(ESlateVisibility::Collapsed);
+		*/
+
+		TB_epclist->SetText(FText::FromString(str_childepc));
 		break;
 	case EEventType::Transformation:
+		/*
 		UGP_parentid->SetVisibility(ESlateVisibility::Collapsed);
+		*/
 		break;
 	case EEventType::Transaction:
-		UGP_parentid->SetVisibility(ESlateVisibility::Collapsed);
-
+		/*
+		UGP_parentid->SetVisibility(ESlateVisibility::Collapsed); 
 		UGP_inputepcs->SetVisibility(ESlateVisibility::Collapsed);
 		UGP_outepcs->SetVisibility(ESlateVisibility::Collapsed);
 		UGP_inquanlist->SetVisibility(ESlateVisibility::Collapsed);
 		UGP_outquanlist->SetVisibility(ESlateVisibility::Collapsed);
+		*/
+		TB_epclist->SetText(FText::FromString(str_epc));
 		break;
 	}
 }
 
+
+FString UEventCardUserWidget::GetStrFromStrList(const TArray<TSharedPtr<FJsonValue>>& strlist) {
+	FString ret = "";
+	for (auto& p : strlist) {
+		ret = ret + p->AsString() + "    ";
+	}
+	return ret;
+}
+
+FString GetStrFromQuantityList(const TArray<TSharedPtr<FJsonValue>>& quans) {
+	FString ret = "";
+	return ret;
+}
 FString UEventCardUserWidget::FormatMyTypeValue(const TArray<TSharedPtr<FJsonValue>>* arrp) {
 	FString s = "";
 	for (auto& p : *arrp) {
