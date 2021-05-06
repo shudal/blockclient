@@ -13,5 +13,6 @@ public:
 	SaveGameUtil();
 	~SaveGameUtil();
 
-	class USGConf* GetSGConf();
+	static class USGConf* GetSGConf();
+	static void HotLoadConf();
 };

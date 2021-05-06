@@ -234,8 +234,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UListView* LV_EventCard = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
+		class UEditableTextBox* ET_uri_host = nullptr;
 	
-		
 public: 
 
 		TQueue<FConfirmMsg> ConfirmMsgs;
@@ -315,6 +317,8 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void NotifyConfirm(FString tip);
 
+	UFUNCTION(BlueprintCallable)
+		void SetUriHostFromET();
 
 	
 public:

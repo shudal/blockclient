@@ -29,3 +29,9 @@ USGConf* SaveGameUtil::GetSGConf() {
 	verifyf(sg != nullptr, TEXT("save game util, create save game object but get null object"));
 	return sg;
 }
+
+void SaveGameUtil::HotLoadConf() {
+	auto sg = GetSGConf(); 
+	StrConst::Get().uri_host = sg->GetUriHost();
+	StrConst::Get().UpdateText();
+}

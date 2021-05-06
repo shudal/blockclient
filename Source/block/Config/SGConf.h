@@ -17,6 +17,9 @@ class BLOCK_API USGConf : public USaveGame
 private:
 	FString slot_name = "";
 	uint32 user_idx = 0;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString uri_host = "";
 public:
 	USGConf();

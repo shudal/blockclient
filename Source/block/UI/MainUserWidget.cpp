@@ -21,6 +21,9 @@
 #include "Math/UnrealMathUtility.h"
 #include "Misc/DateTime.h"
 #include "UObject/GCObjectScopeGuard.h"
+#include "../Util/SaveGameUtil.h"
+#include "Kismet/GameplayStatics.h"
+#include "../Config/SGConf.h"
 
 
 bool UMainUserWidget::Initialize() {
@@ -581,6 +584,13 @@ void UMainUserWidget::DefaultTimer() {
 		
 		this->SwitchWidgetTo(EUIType::VocShow);
 	}
+
+
+	static bool bEverLoadConfFromFile = false;
+	if (!bEverLoadConfFromFile) { 
+		SaveGameUtil::HotLoadConf(); 
+		bEverLoadConfFromFile = true;
+	}
 }
 
 void UMainUserWidget::SetIsViewingNotifyConfirm(bool x) {
@@ -589,4 +599,15 @@ void UMainUserWidget::SetIsViewingNotifyConfirm(bool x) {
 
 bool UMainUserWidget::IsViewingNotifyConfirm() {
 	return bIsViewingNotifyConfirm;
+}
+
+void UMainUserWidget::SetUriHostFromET() {
+	auto uri_host = ET_uri_host->GetText().ToString();
+
+	USGConf* sg = SaveGameUtil::GetSGConf();
+	sg->SetUriHost(uri_host); 
+	UGameplayStatics::SaveGameToSlot(sg, sg->GetSlotName(), sg->GetUserIndex());
+	SaveGameUtil::HotLoadConf();
+	ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("Saved Ok!")));
+
 }
