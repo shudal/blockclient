@@ -118,9 +118,10 @@ void UEventCardUserWidget::SetListItemObject(UEventCardItem* i) {
 		}
 	}
 	{
+		FString str_quans = "";
 		auto quans = eventJO->GetArrayField(StrConst::Get().QUANTITY_LIST);
 		if (quans.Num() > 0) {
-
+			str_quans = GetStrFromQuantityList(quans);
 		}
 	}
 	EEventType et = static_cast<EEventType>(event_type_idx);
@@ -175,8 +176,17 @@ FString UEventCardUserWidget::GetStrFromStrList(const TArray<TSharedPtr<FJsonVal
 	return ret;
 }
 
-FString GetStrFromQuantityList(const TArray<TSharedPtr<FJsonValue>>& quans) {
+FString UEventCardUserWidget::GetStrFromQuantityList(const TArray<TSharedPtr<FJsonValue>>& quans) {
 	FString ret = "";
+	for (auto& p : quans) {
+		auto j = p->AsObject();
+		auto epc = j->GetStringField(StrConst::Get().EPC_CLASS);
+		auto quantity = j->GetStringField(StrConst::Get().QUANTITY);
+		auto uom = j->GetStringField(StrConst::Get().UOM);
+		auto subs = FString::Printf(TEXT("Epc Class: %s, Quantity: %s, Uom: %s;"), *epc, *quantity, *uom);
+
+		ret = ret + subs + "    ";
+	}
 	return ret;
 }
 FString UEventCardUserWidget::FormatMyTypeValue(const TArray<TSharedPtr<FJsonValue>>* arrp) {

@@ -314,6 +314,9 @@ protected:
 		FString GetHostUri();
 	UFUNCTION(BlueprintCallable)
 		void NotifyConfirm(FString tip);
+
+
+	
 public:
 
 	virtual bool Initialize() override;

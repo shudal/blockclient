@@ -13,7 +13,7 @@ public:
 	IntConst();
 	~IntConst();
 
-	IntConst& Get();
+	static IntConst& Get();
 
 	int32 EVENT_TYPE_DEFAULT = 0;
 	int32 EVENT_TYPE_OBJECT = 1;
@@ -24,4 +24,6 @@ public:
 	int32 CALL_METHOD_SUBMIT = 2;
 	int32 EVENT_ERROR_DEC_ID_DEFAULT = -1;
 	int32 EVENT_BELONGED_ERR_DEC_ID_DEFAULT = -1;
+
+	uint32 SGCONF_USER_IDX = 0;
 };

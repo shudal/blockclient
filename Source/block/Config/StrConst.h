@@ -62,4 +62,6 @@ public:
 	FString uri_query_voc = uri_host + "event/query/epc";
 
 	FString VOC_DES = "voc_des";
+
+	FString SLOT_NAME_CONF = "slot_name_conf";
 };

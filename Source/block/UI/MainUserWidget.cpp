@@ -209,7 +209,7 @@ void UMainUserWidget::SubmitEvent() {
 		ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("sending request")));  
 		FThread* t = new FThread(TEXT("hi"), [=]()->void {
 			FGCObjectScopeGuard guard(apiret);
-			while (!apiret->IsCompleted());	
+			while (!apiret->IsCompleted()) {};
 			ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request completed")));
 
 			if (apiret->GetRes() != nullptr) {
@@ -372,7 +372,7 @@ void UMainUserWidget::SubmitVoc() {
 		ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("sending request"))); 
 		FThread* t = new FThread(TEXT("hi"), [=]()->void {
 			FGCObjectScopeGuard guard(apiret);
-			while (!apiret->IsCompleted()); 
+			while (!apiret->IsCompleted()) {};
 			ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request completed")));
 			if (apiret->GetRes() != nullptr) {
 				FString content1, content2 = "";
@@ -461,7 +461,7 @@ void UMainUserWidget::SubmitQueryVoc() {
 		FThread* t = new FThread(TEXT("hi"), [=]()->void {
 			FGCObjectScopeGuard guard(apiret);
 
-			while (!apiret->IsCompleted());
+			while (!apiret->IsCompleted()) {};
 
 			UE_LOG(LogTemp, Warning, TEXT("request completed"));
 			ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("request completed")));
