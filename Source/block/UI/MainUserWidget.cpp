@@ -2,7 +2,7 @@
 
 
 #include "MainUserWidget.h"
-
+#include "MediaPlayer.h"
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/UniformGridPanel.h"	
@@ -24,7 +24,7 @@
 #include "../Util/SaveGameUtil.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Config/SGConf.h"
-
+#include "Misc/MediaBlueprintFunctionLibrary.h" 
 
 bool UMainUserWidget::Initialize() {
 	if (!Super::Initialize()) {
@@ -47,6 +47,7 @@ bool UMainUserWidget::Initialize() {
 	ET_queryvocuri->SetText(FText::FromString("mjh::product::productid002"));
 	this->SubmitQueryVoc();
 	*/
+	//mplayer->
 	return true;
 }
 
@@ -584,12 +585,33 @@ void UMainUserWidget::DefaultTimer() {
 		
 		this->SwitchWidgetTo(EUIType::VocShow);
 	}
-
-
-	static bool bEverLoadConfFromFile = false;
 	if (!bEverLoadConfFromFile) { 
 		SaveGameUtil::HotLoadConf(); 
 		bEverLoadConfFromFile = true;
+	}
+
+	if (!bEverPlayerVideo) {
+		mplayer = LoadObject<UMediaPlayer>(NULL,TEXT("MediaPlayer'/Game/Movies/MediaPlayer.MediaPlayer'"));
+		if (mplayer) { 
+			auto xfilter = (int32)EMediaWebcamCaptureDeviceFilter::Rear;
+			TArray < FMediaCaptureDevice > OutDevices; 
+			UMediaBlueprintFunctionLibrary::EnumerateVideoCaptureDevices(OutDevices,xfilter);
+			for (auto& d : OutDevices) { 
+				FString surl = d.Url;
+				auto x = mplayer->CanPlayUrl(surl);
+				UE_LOG(LogTemp, Warning, TEXT("can play url ?%d"), x ? 1 : 0);
+				x = mplayer->OpenUrl(surl);
+				mplayer->OnMediaOpened.AddDynamic(this, &UMainUserWidget::MediaPlayerOnOpened);
+				mplayer->OnMediaOpenFailed.AddDynamic(this, &UMainUserWidget::MediaPlayerOnOpenFailed);
+				UE_LOG(LogTemp, Warning, TEXT("play url ?%d"), x ? 1 : 0);
+				break;
+			}
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("mpalyer is nullptr") );
+
+		}
+		bEverPlayerVideo = true;
 	}
 }
 
@@ -609,5 +631,16 @@ void UMainUserWidget::SetUriHostFromET() {
 	UGameplayStatics::SaveGameToSlot(sg, sg->GetSlotName(), sg->GetUserIndex());
 	SaveGameUtil::HotLoadConf();
 	ConfirmMsgs.Enqueue(FConfirmMsg(TEXT("Saved Ok!")));
+
+}
+
+void UMainUserWidget::MediaPlayerOnOpened(FString url) {
+	UE_LOG(LogTemp, Warning, TEXT("media opened"));
+
+	
+}
+
+void UMainUserWidget::MediaPlayerOnOpenFailed(FString url) {
+	UE_LOG(LogTemp, Warning, TEXT("media open failed"));
 
 }

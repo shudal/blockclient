@@ -94,7 +94,9 @@ private:
 	TArray<TSharedPtr<FJsonValue>> vocattrs;
 	TArray<TSharedPtr<FJsonValue>> vocchilds;
 
-	bool bIsViewingNotifyConfirm = false;
+	bool bIsViewingNotifyConfirm = false; 
+	bool bEverLoadConfFromFile = false;
+	bool bEverPlayerVideo = false;
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
@@ -238,6 +240,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BindWidget))
 		class UEditableTextBox* ET_uri_host = nullptr;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		class UMediaPlayer* mplayer = nullptr;
 public: 
 
 		TQueue<FConfirmMsg> ConfirmMsgs;
@@ -326,4 +330,10 @@ public:
 	virtual bool Initialize() override;
 	FTimerHandle TimerHandle_DefaultTimer;
 	void DefaultTimer();
+
+
+	UFUNCTION(BlueprintCallable)
+	void MediaPlayerOnOpened(FString url);
+	UFUNCTION(BlueprintCallable)
+	void MediaPlayerOnOpenFailed(FString url);
 };

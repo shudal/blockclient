@@ -201,3 +201,4 @@ FString UEventCardUserWidget::FormatMyTypeValue(const TArray<TSharedPtr<FJsonVal
 	}
 	return s;
 }
+ 
