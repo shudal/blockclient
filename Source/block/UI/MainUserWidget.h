@@ -336,4 +336,7 @@ public:
 	void MediaPlayerOnOpened(FString url);
 	UFUNCTION(BlueprintCallable)
 	void MediaPlayerOnOpenFailed(FString url);
+
+	UFUNCTION(BlueprintImplementableEvent)
+		FString GetMyVideoCaptureDeviceUrl();
 };
